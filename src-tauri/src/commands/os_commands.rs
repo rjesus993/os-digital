@@ -57,7 +57,27 @@ pub async fn save_os_to_sqlite(
         )
         .execute(&mut *tx).await.map_err(|e| e.to_string())?;
     }
+        sqlx::query!("DELETE FROM os_photos WHERE os_id = ?", os.id)
+        .execute(&mut *tx).await.map_err(|e| e.to_string())?;
 
+    for photo in os.photos {
+        sqlx::query!(
+            "INSERT INTO os_photos (id, os_id, path, timestamp) VALUES (?, ?, ?, ?)",
+            photo.id, os.id, photo.path, photo.timestamp
+        )
+        .execute(&mut *tx).await.map_err(|e| e.to_string())?;
+    }
+
+       sqlx::query!("DELETE FROM os_signatures WHERE os_id = ?", os.id)
+        .execute(&mut *tx).await.map_err(|e| e.to_string())?;
+
+    for sig in os.signatures {
+        sqlx::query!(
+            "INSERT INTO os_signatures (id, os_id, type, path, timestamp) VALUES (?, ?, ?, ?, ?)",
+            sig.id, os.id, sig.r#type, sig.path, sig.timestamp
+        )
+        .execute(&mut *tx).await.map_err(|e| e.to_string())?;
+    } 
     // Consolida no SQLite
     tx.commit().await.map_err(|e| e.to_string())?;
 

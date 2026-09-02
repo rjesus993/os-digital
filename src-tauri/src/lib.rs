@@ -29,6 +29,8 @@ pub fn run() {
         // Registra o comando de bridge
         .invoke_handler(tauri::generate_handler![
             commands::os_commands::save_os_to_sqlite
+            commands::os_commands::process_and_save_photo,
+            commands::os_commands::save_signature
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

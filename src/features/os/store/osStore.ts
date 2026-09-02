@@ -54,18 +54,50 @@ const createInitialOs = (): OSDigital => ({
 
 export const useOsStore = create<OsState>()(
   subscribeWithSelector((set) => ({
+    // --- ESTADO ---
     currentOs: null,
 
+    // --- AÇÕES ---
     initNewOs: () => set({ currentOs: createInitialOs() }),
     
     loadOs: (os) => set({ currentOs: os }),
     
     setStep: (step) => set((state) => {
-      if (!state.currentOs) return state;
+      if (!state.currentOs) return {}; // Zustand ignora retornos de objetos vazios
       return { 
-        currentOs: { ...state.currentOs, current_step: step, updated_at: Date.now() } 
+        currentOs: { 
+          ...state.currentOs, 
+          current_step: step, 
+          updated_at: Date.now() 
+        } 
       };
     }),
+
+    addPhoto: (photo: PhotoItem) => set((state) => {
+      if (!state.currentOs) return {}; 
+      return {
+        currentOs: {
+          ...state.currentOs,
+          updated_at: Date.now(),
+          photos: [...state.currentOs.photos, photo]
+        }
+      };
+    }),
+
+    addSignature: (signature: SignatureItem) => set((state) => {
+  if (!state.currentOs) return state;
+  
+  // Substitui a assinatura se já existir uma do mesmo tipo (técnico/cliente)
+  const filteredSigs = state.currentOs.signatures.filter(s => s.type !== signature.type);
+  
+  return {
+    currentOs: {
+      ...state.currentOs,
+      updated_at: Date.now(),
+      signatures: [...filteredSigs, signature]
+    }
+  };
+}),
 
     updateIdentification: (data) => set((state) => {
       if (!state.currentOs) return state;

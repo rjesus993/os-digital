@@ -36,3 +36,23 @@ CREATE TABLE IF NOT EXISTS os_materials (
     is_custom BOOLEAN NOT NULL CHECK (is_custom IN (0, 1)),
     FOREIGN KEY(os_id) REFERENCES os(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS os_photos (
+    id TEXT PRIMARY KEY,
+    os_id TEXT NOT NULL,
+    path TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY(os_id) REFERENCES os(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS os_signatures (
+    id TEXT PRIMARY KEY,
+    os_id TEXT NOT NULL,
+    type TEXT NOT NULL,
+    path TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY(os_id) REFERENCES os(id) ON DELETE CASCADE
+);
+
+-- Garante índices para otimizar a varredura da fila pendente
+CREATE INDEX IF NOT EXISTS idx_os_status ON os(status);
