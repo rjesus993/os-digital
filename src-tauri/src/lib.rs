@@ -1,14 +1,35 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+mod commands;
+mod db;
+mod models;
+
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .plugin(tauri_plugin_shell::init())
+        .setup(|app| {
+            let app_handle = app.handle().clone();
+            
+            // Inicializamos o DB num bloco assíncrono interno
+            tauri::async_runtime::block_on(async move {
+                match db::init_db(&app_handle).await {
+                    Ok(pool) => {
+                        // Injeta o Pool de Conexão no Estado do Tauri
+                        app_handle.manage(pool);
+                        println!("Banco de dados SQLite iniciado com sucesso.");
+                    }
+                    Err(e) => {
+                        eprintln!("Erro crítico ao iniciar o banco: {}", e);
+                    }
+                }
+            });
+            Ok(())
+        })
+        // Registra o comando de bridge
+        .invoke_handler(tauri::generate_handler![
+            commands::os_commands::save_os_to_sqlite
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
