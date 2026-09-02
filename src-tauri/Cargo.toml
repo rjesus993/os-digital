@@ -1,0 +1,7 @@
+[dependencies]
+tauri = { version = "2.0.0", features = ["mac-os-private-api"] }
+tauri-plugin-shell = "2.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.7", features = ["sqlite", "runtime-tokio-native-tls", "migrate"] }
