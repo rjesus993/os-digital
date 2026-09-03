@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { OSDigital, ChecklistItem, MaterialItem } from '../types';
 
 interface OsState {
   currentOs: OSDigital | null;

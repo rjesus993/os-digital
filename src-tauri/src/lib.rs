@@ -26,11 +26,14 @@ pub fn run() {
             });
             Ok(())
         })
-        // Registra o comando de bridge
+        // Registra os comandos de bridge
         .invoke_handler(tauri::generate_handler![
-            commands::os_commands::save_os_to_sqlite
+            commands::os_commands::save_os_to_sqlite,
             commands::os_commands::process_and_save_photo,
-            commands::os_commands::save_signature
+            commands::media_commands::save_signature,
+            commands::os_commands::get_draft_os,
+            commands::os_commands::generate_os_pdf,
+            commands::sync_commands::process_sync_queue
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

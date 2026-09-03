@@ -17,7 +17,8 @@ pub struct OsDigital {
     
     pub checklist: Vec<ChecklistItem>,
     pub materials: Vec<MaterialItem>,
-    // Fotos e Assinaturas (Lote 5 e 6) omitidas nesta primeira migração
+    pub photos: Vec<PhotoItem>,
+    pub signatures: Vec<SignatureItem>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -38,4 +39,24 @@ pub struct MaterialItem {
     pub unit: String,
     pub observation: Option<String>,
     pub is_custom: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PhotoItem {
+    pub id: String,
+    pub os_id: String,
+    pub filename: String,
+    pub storage_path: String,
+    pub caption: Option<String>,
+    pub category: String,
+    pub created_at: i64,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SignatureItem {
+    pub id: String,
+    pub os_id: String,
+    pub sig_type: String, // "technician" ou "client"
+    pub file_path: String,
+    pub created_at: i64,
 }

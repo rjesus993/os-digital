@@ -2,7 +2,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { CheckCircle, X, PenTool } from 'lucide-react';
 import { useOsStore } from '../store/osStore';
-import { SignatureItem } from '../types';
 import { Button } from '../../../components/ui/Button';
 
 interface Props {
@@ -84,30 +83,36 @@ export const SignaturePad: React.FC<Props> = ({ type, label }) => {
     }
   };
 
-  const handleSave = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas || !currentOs) return;
+const handleSave = async () => {
+  const canvas = canvasRef.current;
+  if (!canvas || !currentOs) return;
 
-    // Transforma o canvas em Blob (sem Base64)
-    canvas.toBlob(async (blob) => {
-      if (!blob) return;
-      try {
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
+  try {
+    // Converte o canvas para Blob usando Promise
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/png');
+    });
 
-        // Envia para o Rust
-        const savedSignature = await invoke<SignatureItem>('save_signature', {
-          osId: currentOs.id,
-          sigType: type,
-          imageBytes: uint8Array,
-        });
+    if (!blob) {
+      console.error("Erro ao gerar blob do canvas");
+      return;
+    }
 
-        addSignature(savedSignature);
-      } catch (error) {
-        console.error("Erro ao salvar assinatura:", error);
-      }
-    }, 'image/png');
-  };
+    const arrayBuffer = await blob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    // Envia para o Rust
+    const savedSignature = await invoke<SignatureItem>('save_signature', {
+      osId: currentOs.id,
+      sigType: type,
+      imageBytes: uint8Array,
+    });
+
+    addSignature(savedSignature);
+  } catch (error) {
+    console.error("Erro ao salvar assinatura:", error);
+  }
+};
 
   // Se já assinou, renderiza o estado de sucesso
   if (existingSignature) {

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { useOsStore } from '../features/os/store/osStore';
 import { useAutoSave } from '../features/os/hooks/useAutoSave';
-import { OSDigital } from '../features/os/types';
 
 import { Screen1Identification } from '../features/os/pages/Screen1Identification';
 // import { Screen2Checklist } from '../features/os/pages/Screen2Checklist';

@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { Camera, Loader2, CheckCircle } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { useOsStore } from '../store/osStore';
-import { PhotoItem } from '../types';
 
 export const PhotoGrid: React.FC = () => {
   const { currentOs, addPhoto } = useOsStore();

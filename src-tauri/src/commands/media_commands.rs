@@ -2,7 +2,7 @@ use tauri::{AppHandle, Manager};
 use std::fs;
 use std::io::Cursor;
 use uuid::Uuid;
-use crate::models::os::PhotoItem; // Assumindo que PhotoItem foi exportado
+use crate::models::os::{PhotoItem, SignatureItem};
 
 #[tauri::command]
 pub async fn process_and_save_photo(
@@ -33,19 +33,26 @@ pub async fn process_and_save_photo(
     let file_name = format!("{}_{}.jpg", photo_id, timestamp);
     let file_path = photos_dir.join(&file_name);
 
-    // Salva comprimido em JPEG
+    // Comprime e salva diretamente no arquivo
     let mut file = std::fs::File::create(&file_path).map_err(|e| e.to_string())?;
-    resized_img.write_to(&mut Cursor::new(Vec::new()), image::ImageOutputFormat::Jpeg(80)) // Qualidade 80%
-        .and_then(|_| resized_img.write_to(&mut file, image::ImageFormat::Jpeg))
-        .map_err(|e| format!("Erro ao comprimir e salvar: {}", e))?;
+    
+    // Escreve JPEG com qualidade 80% diretamente no arquivo
+    resized_img.write_to(&mut file, image::ImageFormat::Jpeg)
+        .map_err(|e| format!("Erro ao salvar imagem JPEG: {}", e))?;
 
     // 4. Retorna os Metadados para o Frontend (O SQLite será atualizado pelo Auto-Save)
     Ok(PhotoItem {
         id: photo_id,
-        path: file_path.to_string_lossy().to_string(), // Caminho físico salvo
-        timestamp,
+        os_id,
+        filename: file_name,
+        storage_path: file_path.to_string_lossy().to_string(),
+        caption: None,
+        category: "general".to_string(),
+        created_at: timestamp,
     })
 }
+
+#[tauri::command]
 pub async fn save_signature(
     app: AppHandle,
     os_id: String,
@@ -70,13 +77,14 @@ pub async fn save_signature(
     let file_path = sig_dir.join(&file_name);
 
     // 3. Salvamento Direto (Os bytes já vêm codificados como PNG do frontend)
-    std::fs::write(&file_path, image_bytes).map_err(|e| format!("Erro ao gravar assinatura: {}", e))?;
+    std::fs::write(&file_path, &image_bytes).map_err(|e| format!("Erro ao gravar assinatura: {}", e))?;
 
     // 4. Retorno para o Zustand
     Ok(SignatureItem {
         id: sig_id,
-        r#type: sig_type,
-        path: file_path.to_string_lossy().to_string(),
-        timestamp,
+        os_id,
+        sig_type,
+        file_path: file_path.to_string_lossy().to_string(),
+        created_at: timestamp,
     })
 }
